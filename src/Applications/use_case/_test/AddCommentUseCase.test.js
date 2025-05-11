@@ -35,13 +35,8 @@ describe('AddCommentUseCase', () => {
         username: 'dicoding',
         fullname: 'Dicoding Indonesia',
       }));
-    mockThreadRepository.getThreadById = jest.fn()
-      .mockImplementation(() => Promise.resolve({
-        id: 'thread-123',
-        title: 'Thread Title',
-        body: 'lorem ipsum dolor sit amet',
-        user_id: 'user-123',
-      }));
+    mockThreadRepository.verifyAvailableThreadById = jest.fn()
+      .mockImplementation(() => Promise.resolve(true));
     mockCommentRepository.addComment = jest.fn()
       .mockImplementation(() => Promise.resolve(mockAddedComment));
 
@@ -63,7 +58,7 @@ describe('AddCommentUseCase', () => {
     }));
 
     expect(mockUserRepository.getUserById).toBeCalledWith(useCasePayload.userId);
-    expect(mockThreadRepository.getThreadById).toBeCalledWith(useCasePayload.threadId);
+    expect(mockThreadRepository.verifyAvailableThreadById).toBeCalledWith(useCasePayload.threadId);
     expect(mockCommentRepository.addComment).toBeCalledWith(new AddComment({
       userId: useCasePayload.userId,
       threadId: useCasePayload.threadId,
