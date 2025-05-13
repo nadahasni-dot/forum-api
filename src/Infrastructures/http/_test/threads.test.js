@@ -6,9 +6,11 @@ const container = require('../../container');
 const createServer = require('../createServer');
 
 const pool = require('../../database/postgres/pool');
+const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
 
 describe('/threads endpoint', () => {
   let accessToken = '';
+  let userId = '';
 
   beforeAll(async () => {
     // Arrange
@@ -18,7 +20,7 @@ describe('/threads endpoint', () => {
     };
     const server = await createServer(container);
     // add user
-    await server.inject({
+    const responseUser = await server.inject({
       method: 'POST',
       url: '/users',
       payload: {
@@ -27,6 +29,8 @@ describe('/threads endpoint', () => {
         fullname: 'Dicoding Indonesia',
       },
     });
+    const responseUserJson = JSON.parse(responseUser.payload);
+    userId = responseUserJson.data.addedUser.id;
 
     // Action
     const response = await server.inject({
@@ -39,14 +43,15 @@ describe('/threads endpoint', () => {
     accessToken = responseJson.data.accessToken;
   });
 
-  afterAll(async () => {
-    await pool.end();
+  afterEach(async () => {
+    await CommentsTableTestHelper.cleanTable();
+    await ThreadsTableTestHelper.cleanTable();
   });
 
-  afterEach(async () => {
-    await ThreadsTableTestHelper.cleanTable();
+  afterAll(async () => {
     await UsersTableTestHelper.cleanTable();
     await AuthenticationsTableTestHelper.cleanTable();
+    await pool.end();
   });
 
   describe('when POST /threads', () => {
@@ -146,20 +151,117 @@ describe('/threads endpoint', () => {
       // Assert
       expect(response.statusCode).toEqual(401);
     });
+
+    it('should response 401 when no access token is provided', async () => {
+      const server = await createServer(container);
+
+      const response = await server.inject({
+        method: 'POST',
+        url: '/threads',
+        payload: {
+          title: 'test',
+          body: 'body',
+        },
+      });
+
+      expect(response.statusCode).toEqual(401);
+    });
   });
 
-  it('should response 401 when no access token is provided', async () => {
-    const server = await createServer(container);
+  describe('when GET /threads/{threadId}', () => {
+    it('should return 200 with correct thread detail response', async () => {
+      // ARRANGE
+      await ThreadsTableTestHelper.addThread({
+        id: 'thread-test',
+        title: 'Thread baru',
+        body: 'body thread',
+        userId,
+      });
 
-    const response = await server.inject({
-      method: 'POST',
-      url: '/threads',
-      payload: {
-        title: 'test',
-        body: 'body',
-      },
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-1',
+        threadId: 'thread-test',
+        userId,
+        isDelete: true,
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-2',
+        threadId: 'thread-test',
+        userId,
+        isDelete: false,
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-3',
+        threadId: 'thread-test',
+        userId,
+        isDelete: false,
+        content: 'Prikitiw',
+      });
+
+      const server = await createServer(container);
+
+      // ACTION
+      const response = await server.inject({
+        method: 'GET',
+        url: '/threads/thread-test',
+      });
+
+      // ASSERT
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual('success');
+
+      expect(responseJson.data.thread).toBeDefined();
+      expect(responseJson.data.thread.id).toEqual('thread-test');
+      expect(responseJson.data.thread.username).toEqual('dicoding');
+
+      expect(responseJson.data.thread.comments).toHaveLength(3);
+      expect(responseJson.data.thread.comments[0].content).toEqual('Prikitiw');
+      expect(responseJson.data.thread.comments[2].content).toEqual('**komentar telah dihapus**');
     });
 
-    expect(response.statusCode).toEqual(401);
+    it('should return 404 when thread not found', async () => {
+      // ARRANGE
+      await ThreadsTableTestHelper.addThread({
+        id: 'thread-test',
+        title: 'Thread baru',
+        body: 'body thread',
+        userId,
+      });
+
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-1',
+        threadId: 'thread-test',
+        userId,
+        isDelete: true,
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-2',
+        threadId: 'thread-test',
+        userId,
+        isDelete: false,
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-3',
+        threadId: 'thread-test',
+        userId,
+        isDelete: false,
+        content: 'Prikitiw',
+      });
+
+      const server = await createServer(container);
+
+      // ACTION
+      const response = await server.inject({
+        method: 'GET',
+        url: '/threads/thread-notfound',
+      });
+
+      // ASSERT
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(404);
+      expect(responseJson.status).toEqual('fail');
+      expect(responseJson.message).toBeDefined();
+    });
   });
 });

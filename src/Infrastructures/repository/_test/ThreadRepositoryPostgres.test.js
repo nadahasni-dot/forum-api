@@ -3,12 +3,13 @@ const AddedThread = require('../../../Domains/threads/entities/AddedThread');
 const AddThread = require('../../../Domains/threads/entities/AddThread');
 const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
 const pool = require('../../database/postgres/pool');
-const InvariantError = require('../../../Commons/exceptions/InvariantError');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
+const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 
 describe('ThreadRepositoryPostgres', () => {
   afterEach(async () => {
     await ThreadsTableTestHelper.cleanTable();
+    await UsersTableTestHelper.cleanTable();
   });
 
   afterAll(async () => {
@@ -57,23 +58,31 @@ describe('ThreadRepositoryPostgres', () => {
   });
 
   describe('getThreadById function', () => {
-    it('should throw InvariantError when thread not found', async () => {
+    it('should throw NotFoundError when thread not found', async () => {
       // Arrange
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
       // Action & Assert
       await expect(threadRepositoryPostgres.getThreadById('thread-321'))
         .rejects
-        .toThrowError(InvariantError);
+        .toThrowError(NotFoundError);
     });
 
     it('should return thread object correctly', async () => {
       // Arrange
+      const date = new Date();
+      await UsersTableTestHelper.addUser({
+        id: 'user-123',
+        username: 'user1',
+        password: 'secretpassword',
+        fullname: 'User Satu',
+      });
       await ThreadsTableTestHelper.addThread({
         id: 'thread-321',
         title: 'Thread title',
         body: 'lorem ipsum dolor sit amet',
         userId: 'user-123',
+        date,
       });
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
@@ -85,7 +94,8 @@ describe('ThreadRepositoryPostgres', () => {
         id: 'thread-321',
         title: 'Thread title',
         body: 'lorem ipsum dolor sit amet',
-        user_id: 'user-123',
+        username: 'user1',
+        date,
       });
     });
   });

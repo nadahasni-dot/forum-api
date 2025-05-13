@@ -22,6 +22,10 @@ describe('DomainErrorTranslator', () => {
       .toStrictEqual(new InvariantError('tidak dapat membuat thread baru karena tipe data tidak sesuai'));
     expect(DomainErrorTranslator.translate(new Error('VERIFY_THREAD.DATA_NOT_FOUND')))
       .toStrictEqual(new NotFoundError('tidak dapat menemukan data thread'));
+    expect(DomainErrorTranslator.translate(new Error('GET_THREAD_DETAILS.NOT_CONTAIN_NEEDED_PROPERTY')))
+      .toStrictEqual(new InvariantError('tidak dapat mendapatkan thread karena properti yang dibutuhkan tidak ada'));
+    expect(DomainErrorTranslator.translate(new Error('GET_THREAD_DETAILS.NOT_MEET_DATA_TYPE_SPECIFICATION')))
+      .toStrictEqual(new InvariantError('tidak dapat mendapatkan thread karena tipe data tidak sesuai'));
 
     // COMMENT
     expect(DomainErrorTranslator.translate(new Error('ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY')))

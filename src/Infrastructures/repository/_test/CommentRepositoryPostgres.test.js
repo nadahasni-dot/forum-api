@@ -7,10 +7,12 @@ const InvariantError = require('../../../Commons/exceptions/InvariantError');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const DeleteComment = require('../../../Domains/comments/entities/DeleteComment');
 const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
+const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 
 describe('CommentRepositoryPostgres', () => {
   afterEach(async () => {
     await CommentsTableTestHelper.cleanTable();
+    await UsersTableTestHelper.cleanTable();
   });
 
   afterAll(async () => {
@@ -173,6 +175,69 @@ describe('CommentRepositoryPostgres', () => {
         user_id: 'user-123',
         thread_id: 'thread-123',
       });
+    });
+  });
+
+  describe('getCommentsByThreadId function', () => {
+    it('should return empty array when comment is empty', async () => {
+      // ARRANGE
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-1',
+        threadId: 'thread-xxx',
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-2',
+        threadId: 'thread-xxx',
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-3',
+        threadId: 'thread-xxx',
+      });
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      // ACTION
+      const comments = await commentRepositoryPostgres.getCommentsByThreadId('thread-walawe');
+
+      // ASSERT
+      expect(comments).toHaveLength(0);
+      expect(comments).toEqual([]);
+    });
+
+    it('should return comments for related thread', async () => {
+      // ARRANGE
+      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'billie' });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-1',
+        content: 'content-1',
+        threadId: 'thread-xxx',
+        userId: 'user-123',
+        isDelete: true,
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-2',
+        content: 'content-2',
+        threadId: 'thread-xxx',
+        userId: 'user-123',
+        isDelete: false,
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-3',
+        content: 'content-3',
+        threadId: 'thread-xxx',
+        userId: 'user-123',
+        isDelete: true,
+      });
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      // ACTION
+      const comments = await commentRepositoryPostgres.getCommentsByThreadId('thread-xxx');
+
+      // ASSERT
+      expect(comments).toHaveLength(3);
+      expect(comments[0].id).toEqual('comment-3');
+      expect(comments[0].content).toEqual('content-3');
+      expect(comments[0].username).toEqual('billie');
+      expect(comments[0].is_delete).toEqual(true);
     });
   });
 });
