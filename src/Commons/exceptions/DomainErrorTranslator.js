@@ -1,3 +1,4 @@
+const AuthorizationError = require('./AuthorizationError');
 const InvariantError = require('./InvariantError');
 const NotFoundError = require('./NotFoundError');
 
@@ -20,9 +21,11 @@ DomainErrorTranslator._directories = {
   'DELETE_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('refresh token harus string'),
   'ADD_THREAD.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat membuat thread baru karena properti yang dibutuhkan tidak ada'),
   'ADD_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat membuat thread baru karena tipe data tidak sesuai'),
+  'VERIFY_THREAD.DATA_NOT_FOUND': new NotFoundError('tidak dapat menemukan data thread'),
   'ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat membuat comment baru karena properti yang dibutuhkan tidak ada'),
   'ADD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat membuat comment baru karena tipe data tidak sesuai'),
-  'VERIFY_THREAD.DATA_NOT_FOUND': new NotFoundError('tidak dapat membuat comment baru karena thread tidak ditemukan'),
+  'VERIFY_COMMENT.DATA_NOT_FOUND': new NotFoundError('tidak dapat menemukan data comment'),
+  'VERIFY_COMMENT.INVALID_OWNER': new AuthorizationError('anda tidak dapat mengakses comment ini'),
 };
 
 module.exports = DomainErrorTranslator;

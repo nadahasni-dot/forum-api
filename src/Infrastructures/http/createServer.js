@@ -10,7 +10,6 @@ const users = require('../../Interfaces/http/api/users');
 const authentications = require('../../Interfaces/http/api/authentications');
 const threads = require('../../Interfaces/http/api/threads');
 const comments = require('../../Interfaces/http/api/comments');
-const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 
 const createServer = async (container) => {
   const server = Hapi.server({
@@ -90,6 +89,7 @@ const createServer = async (container) => {
         message: 'terjadi kegagalan pada server kami',
       });
       newResponse.code(500);
+
       return newResponse;
     }
 

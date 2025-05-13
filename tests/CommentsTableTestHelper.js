@@ -26,6 +26,16 @@ const CommentsTableTestHelper = {
     return result.rows;
   },
 
+  async deleteCommentById(id) {
+    const query = {
+      text: 'UPDATE SET is_delete = TRUE FROM comments WHERE id = $1',
+      values: [id],
+    };
+
+    const result = await pool.query(query);
+    return result.rows;
+  },
+
   async cleanTable() {
     await pool.query('DELETE FROM comments WHERE 1=1');
   },

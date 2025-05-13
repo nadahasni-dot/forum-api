@@ -24,7 +24,7 @@ describe('a AddComment entities', () => {
     expect(() => new AddComment(payload)).toThrowError('ADD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION');
   });
 
-  it('should create addThread object correctly', () => {
+  it('should create addComment object correctly', () => {
     // Arrange
     const payload = {
       userId: 'user-test',
