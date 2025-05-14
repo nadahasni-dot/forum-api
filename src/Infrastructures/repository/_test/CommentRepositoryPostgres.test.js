@@ -240,4 +240,39 @@ describe('CommentRepositoryPostgres', () => {
       expect(comments[0].is_delete).toEqual(true);
     });
   });
+
+  describe('deleteCommentById function', () => {
+    it('should flag related comment to is_delete true', async () => {
+      // ARRANGE
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-1',
+        content: 'content-1',
+        threadId: 'thread-xxx',
+        userId: 'user-123',
+        isDelete: false,
+      });
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      // ACTION
+      const result = await commentRepositoryPostgres.deleteCommentById({ commentId: 'comment-1' });
+
+      // ASSERT
+      expect(result).toEqual(1);
+
+      const [updatedComment] = await CommentsTableTestHelper.findCommentById('comment-1');
+      expect(updatedComment.id).toEqual('comment-1');
+      expect(updatedComment.is_delete).toEqual(true);
+    });
+
+    it('should not flag as delete any comments if comment id not found', async () => {
+      // ARRANGE
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      // ACTION
+      const result = await commentRepositoryPostgres.deleteCommentById({ commentId: 'comment-1' });
+
+      // ASSERT
+      expect(result).toEqual(0);
+    });
+  });
 });

@@ -8,7 +8,6 @@ exports.up = (pgm) => {
     title: {
       type: 'TEXT',
       notNull: true,
-      unique: true,
     },
     body: {
       type: 'TEXT',

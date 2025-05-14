@@ -34,18 +34,21 @@ describe('GetThreadDetailsUseCase', () => {
           username: 'batman',
           date: mockTime,
           content: 'Komentar 1',
+          is_delete: false,
         },
         {
           id: 'comment-2',
           username: 'spiderman',
           date: mockTime,
           content: 'Komentar 2',
+          is_delete: false,
         },
         {
           id: 'comment-3',
           username: 'wonderwoman',
           date: mockTime,
           content: 'Komentar 3',
+          is_delete: true,
         },
       ]));
 
@@ -66,10 +69,16 @@ describe('GetThreadDetailsUseCase', () => {
     expect(thread.username).toEqual('superman');
 
     expect(thread.comments).toHaveLength(3);
+
     expect(thread.comments[0].id).toEqual('comment-1');
     expect(thread.comments[0].username).toEqual('batman');
     expect(thread.comments[0].date).toEqual(mockTime);
     expect(thread.comments[0].content).toEqual('Komentar 1');
+
+    expect(thread.comments[2].id).toEqual('comment-3');
+    expect(thread.comments[2].username).toEqual('wonderwoman');
+    expect(thread.comments[2].date).toEqual(mockTime);
+    expect(thread.comments[2].content).toEqual('**komentar telah dihapus**');
 
     expect(mockThreadRepository.getThreadById).toBeCalledWith(useCasePayload.threadId);
     expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith(useCasePayload.threadId);
