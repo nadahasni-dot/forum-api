@@ -36,12 +36,16 @@ describe('DeleteCommentUseCase', () => {
         content: 'lorem ipsum dolor sit amet',
         user_id: 'user-123',
         thread_id: 'thread-123',
-        is_delete: false,
       }));
     mockCommentRepository.verifyCommentOwner = jest.fn()
-      .mockImplementation(() => Promise.resolve(true));
+      .mockImplementation(() => Promise.resolve({
+        id: 'comment-1',
+        content: 'lorem',
+        user_id: 'user-a1233s',
+        thread_id: 'thread-123s',
+      }));
     mockCommentRepository.deleteCommentById = jest.fn()
-      .mockImplementation(() => Promise.resolve(true));
+      .mockImplementation(() => Promise.resolve(1));
 
     /** creating use case instance */
     const deleteCommentUseCase = new DeleteCommentUseCase({
@@ -54,7 +58,7 @@ describe('DeleteCommentUseCase', () => {
     const deletedComment = await deleteCommentUseCase.execute(useCasePayload);
 
     // Assert
-    expect(deletedComment).toStrictEqual(true);
+    expect(deletedComment).toEqual(1);
 
     expect(mockUserRepository.getUserById).toBeCalledWith(useCasePayload.userId);
     expect(mockCommentRepository.verifyCommentAvailability)

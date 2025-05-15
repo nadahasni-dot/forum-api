@@ -27,7 +27,11 @@ class CommentRepositoryPostgres extends CommentRepository {
       user_id: savedUserId,
     } = result.rows[0];
 
-    return new AddedComment({ id: savedId, content: savedContent, owner: savedUserId });
+    return new AddedComment({
+      id: savedId,
+      content: savedContent,
+      owner: savedUserId,
+    });
   }
 
   async getCommentById(commentId) {
@@ -58,8 +62,7 @@ class CommentRepositoryPostgres extends CommentRepository {
       throw new NotFoundError('VERIFY_COMMENT.DATA_NOT_FOUND');
     }
 
-    const comment = result.rows[0];
-    return comment;
+    return result.rows[0];
   }
 
   async verifyCommentOwner(deleteComment) {
@@ -76,8 +79,7 @@ class CommentRepositoryPostgres extends CommentRepository {
       throw new AuthorizationError('VERIFY_COMMENT.INVALID_OWNER');
     }
 
-    const comment = result.rows[0];
-    return comment;
+    return result.rows[0];
   }
 
   async deleteCommentById(deleteComment) {
