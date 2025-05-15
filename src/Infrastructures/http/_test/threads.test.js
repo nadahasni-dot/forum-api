@@ -216,8 +216,8 @@ describe('/threads endpoint', () => {
       expect(responseJson.data.thread.username).toEqual('dicoding');
 
       expect(responseJson.data.thread.comments).toHaveLength(3);
-      expect(responseJson.data.thread.comments[0].content).toEqual('Prikitiw');
-      expect(responseJson.data.thread.comments[2].content).toEqual('**komentar telah dihapus**');
+      expect(responseJson.data.thread.comments[0].content).toEqual('**komentar telah dihapus**');
+      expect(responseJson.data.thread.comments[2].content).toEqual('Prikitiw');
     });
 
     it('should return 404 when thread not found', async () => {

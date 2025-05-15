@@ -32,10 +32,10 @@ describe('DeleteCommentUseCase', () => {
       .mockImplementation(() => Promise.resolve(true));
     mockCommentRepository.verifyCommentAvailability = jest.fn()
       .mockImplementation(() => Promise.resolve({
-        commentId: 'comment-123',
-        userId: 'user-123',
-        threadId: 'thread-123',
+        id: 'comment-123',
         content: 'lorem ipsum dolor sit amet',
+        user_id: 'user-123',
+        thread_id: 'thread-123',
         is_delete: false,
       }));
     mockCommentRepository.verifyCommentOwner = jest.fn()

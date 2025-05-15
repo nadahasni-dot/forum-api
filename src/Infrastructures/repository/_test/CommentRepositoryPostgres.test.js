@@ -234,10 +234,10 @@ describe('CommentRepositoryPostgres', () => {
 
       // ASSERT
       expect(comments).toHaveLength(3);
-      expect(comments[0].id).toEqual('comment-3');
-      expect(comments[0].content).toEqual('content-3');
-      expect(comments[0].username).toEqual('billie');
-      expect(comments[0].is_delete).toEqual(true);
+      expect(comments[2].id).toEqual('comment-3');
+      expect(comments[2].content).toEqual('content-3');
+      expect(comments[2].username).toEqual('billie');
+      expect(comments[2].is_delete).toEqual(true);
     });
   });
 
