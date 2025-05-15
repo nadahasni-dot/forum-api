@@ -46,8 +46,7 @@ class CommentRepositoryPostgres extends CommentRepository {
       throw new InvariantError('comment tidak ditemukan');
     }
 
-    const comment = result.rows[0];
-    return comment;
+    return result.rows[0];
   }
 
   async verifyCommentAvailability(commentId) {
