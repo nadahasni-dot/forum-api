@@ -206,12 +206,14 @@ describe('CommentRepositoryPostgres', () => {
     it('should return comments for related thread', async () => {
       // ARRANGE
       await UsersTableTestHelper.addUser({ id: 'user-123', username: 'billie' });
+      const mockDateTime = new Date();
       await CommentsTableTestHelper.addComment({
         id: 'comment-1',
         content: 'content-1',
         threadId: 'thread-xxx',
         userId: 'user-123',
         isDelete: true,
+        date: mockDateTime,
       });
       await CommentsTableTestHelper.addComment({
         id: 'comment-2',
@@ -219,6 +221,7 @@ describe('CommentRepositoryPostgres', () => {
         threadId: 'thread-xxx',
         userId: 'user-123',
         isDelete: false,
+        date: mockDateTime,
       });
       await CommentsTableTestHelper.addComment({
         id: 'comment-3',
@@ -226,6 +229,7 @@ describe('CommentRepositoryPostgres', () => {
         threadId: 'thread-xxx',
         userId: 'user-123',
         isDelete: true,
+        date: mockDateTime,
       });
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
@@ -234,22 +238,41 @@ describe('CommentRepositoryPostgres', () => {
 
       // ASSERT
       expect(comments).toHaveLength(3);
-      expect(comments[2].id).toEqual('comment-3');
-      expect(comments[2].content).toEqual('content-3');
-      expect(comments[2].username).toEqual('billie');
-      expect(comments[2].is_delete).toEqual(true);
+      expect(comments[0]).toEqual({
+        id: 'comment-1',
+        username: 'billie',
+        date: mockDateTime,
+        content: 'content-1',
+        is_delete: true,
+      });
+      expect(comments[1]).toEqual({
+        id: 'comment-2',
+        username: 'billie',
+        date: mockDateTime,
+        content: 'content-2',
+        is_delete: false,
+      });
+      expect(comments[2]).toEqual({
+        id: 'comment-3',
+        username: 'billie',
+        date: mockDateTime,
+        content: 'content-3',
+        is_delete: true,
+      });
     });
   });
 
   describe('deleteCommentById function', () => {
     it('should flag related comment to is_delete true', async () => {
       // ARRANGE
+      const mockDateTime = new Date();
       await CommentsTableTestHelper.addComment({
         id: 'comment-1',
         content: 'content-1',
         threadId: 'thread-xxx',
         userId: 'user-123',
         isDelete: false,
+        date: mockDateTime,
       });
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
@@ -260,8 +283,14 @@ describe('CommentRepositoryPostgres', () => {
       expect(result).toEqual(1);
 
       const [updatedComment] = await CommentsTableTestHelper.findCommentById('comment-1');
-      expect(updatedComment.id).toEqual('comment-1');
-      expect(updatedComment.is_delete).toEqual(true);
+      expect(updatedComment).toEqual({
+        id: 'comment-1',
+        thread_id: 'thread-xxx',
+        user_id: 'user-123',
+        content: 'content-1',
+        is_delete: true,
+        date: mockDateTime,
+      });
     });
 
     it('should not flag as delete any comments if comment id not found', async () => {
